@@ -32,12 +32,14 @@ namespace EBSProject.Subscribers
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
+           
             List<Subscription> subscriptions =
                 SubscriptionGenerator.GenerateSubscriptions(Configuration.SubscriptionsNumber);
             foreach (var subscription in subscriptions)
             {
                 subscription.SubscriberTopic = _topic;
                 _messagePublisher.PublishSubscription(subscription);
+                Console.WriteLine(subscription.ToString());
             }
 
             _subscriptionsClient.RegisterMessageHandler((message, token) =>
@@ -68,7 +70,7 @@ namespace EBSProject.Subscribers
 
              //   Console.WriteLine($"Total messages is : {totalReceivedPublications}");
              //   Console.WriteLine($"Total difference in ms is : {totalReceivedPublicationsLatency}");
-             //   Console.WriteLine($"Total avg latency (difference/msg) in ms: {totalReceivedPublicationsLatency/(double)totalReceivedPublicationsLatency}");
+             //   Console.WriteLine($"Total avg latency (difference/msg) in ms: {(double) (totalReceivedPublicationsLatency/(double)totalReceivedPublicationsLatency)}");
             }
             catch (Exception e)
             { }

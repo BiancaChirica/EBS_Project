@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using EBSProject.Models;
 using EBSProject.Shared;
@@ -8,146 +9,229 @@ namespace EBSProject.Subscribers
 {
     public class SubscriptionGenerator
     {
-
-        static Random random = new Random();
-
-        static string[] template = { "StationId", "City", "Temp", "Rain", "Wind", "Direction", "Date" };
-        // domains
-        static string[] cities = { "Botosani", "Iasi", "Cluj", "Timisoara", "Bucuresti", "Constanta", "Brasov", "Suceava", "Craiova", "Oradea" };
-        static string[] direction = { "N", "S", "E", "V", "NE", "NV", "SE", "SV" };
-        static List<List<string>> operators = new List<List<string>>() { new List<string>() { "=", "!=" }, new List<string>() { "=", ">", "<" } };
-
-        // Limits
-        static int[] tempLimit = { -30, 30 };
-        static int[] rainLimit = { 0, 100 };
-        static int[] windLimit = { 0, 30 };
-        static int[] daysLimit = { 0, 10 };
-        static int[] stationIdLimit = { 0, 100 };
-
-        public static string getRandomCity()
+        private static Dictionary<string, int> getRatio(int subscriptionCount, List<int> percentage, List<string> template)
         {
+            Dictionary<string, int> ratio = new Dictionary<string, int>();
+            for (int index = 0; index < percentage.Count; index++)
+            {
 
-            return cities[random.Next(cities.Length)];
+                if (percentage[index] != 0)
+                {
+                    ratio.Add(template[index], (int)((percentage[index] * 1.0 / 100 * subscriptionCount)));
+                }
+            }
+
+            return ratio;
         }
 
-
-        public static int getRandomStationId()
+        private static Dictionary<string, int> recalculateRatio(Dictionary<string, int> repetitionListForFields, string fieldToAdd)
         {
-            return random.Next(stationIdLimit[0], stationIdLimit[1]);
+            Dictionary<string, int> recalculatedList = repetitionListForFields;
+            recalculatedList[fieldToAdd] = recalculatedList[fieldToAdd] - 1;
+            if (recalculatedList[fieldToAdd] == 0)
+                recalculatedList.Remove(fieldToAdd);
+            return recalculatedList;
         }
 
-
-        public static int getRandomTemp()
+        private static Condition getCondition(
+            string fieldToAdd,
+            Dictionary<string, List<string>> operators,
+            List<string> cities,
+            int tempMinim,
+            int tempMaxim,
+            int rainMinim,
+            int rainMaxim,
+            int windMinim,
+            int windMaxim,
+            int daysRange,
+            int stationidMinim,
+            int stationidMaxim,
+            List<string> directionList)
         {
-            return random.Next(tempLimit[0], tempLimit[1]);
+            Random random = new Random();
+            Condition condition = new Condition();
+            condition.Field = fieldToAdd;
+            condition.Operator = operators[fieldToAdd][random.Next(operators[fieldToAdd].Count)];
+
+            switch (fieldToAdd)
+            {
+                case "stationid":
+                    condition.Value = random.Next(stationidMinim, stationidMaxim).ToString();
+                    break;
+                case "city":
+                    condition.Value = cities[random.Next(cities.Count)];
+                    break;
+                case "temp":
+                    condition.Value = random.Next(tempMinim, tempMaxim).ToString();
+                    break;
+                case "rain":
+                    condition.Value = random.Next(rainMinim, rainMaxim).ToString();
+                    break;
+                case "wind":
+                    condition.Value = random.Next(windMinim, windMaxim).ToString();
+                    break;
+                case "direction":
+                    condition.Value = directionList[random.Next(directionList.Count)];
+                    break;
+                case "date":
+                    condition.Value = DateTime.Today.AddDays(random.Next(0, daysRange)).ToString("dd-MMM-yy");
+                    break;
+                default:
+                    condition.Value = "0";
+                    break;
+            }
+
+            return condition;
         }
 
-
-        public static double getRandomRain()
+        public static List<Subscription> GenerateSimpleSubscription(
+            int countSub,
+            bool isComplex,
+            int tempMinim,
+            int tempMaxim,
+            int rainMinim,
+            int rainMaxim,
+            int windMinim,
+            int windMaxim,
+            int daysRange,
+            int stationidMinim,
+            int stationidMaxim,
+            int percentageForEqualForCity,
+            Dictionary<string, List<string>> operators,
+            List<string> template,
+            List<int> percentage,
+            List<string> cities,
+            List<string> directionList)
         {
-            return Math.Round(random.NextDouble(), 2);
-        }
-
-
-        public static int getRandomWind()
-        {
-            return random.Next(windLimit[0], windLimit[1]);
-        }
-
-
-        public static string getRandomDirection()
-        {
-            return direction[random.Next(direction.Length)];
-        }
-
-
-        public static DateTime getRandomDate()
-        {
-            return DateTime.Now.AddDays(random.Next(daysLimit[0], daysLimit[1])).Date;
-        }
-
-        // Generates the subs with random values for the fields
-        public static List<Subscription> GenerateSubscriptions(int numberOfSub)
-        {
-
-            List<Subscription> subscriptions = new List<Subscription>();
-            for (int index = 0; index < numberOfSub; index++)
+            var random = new Random();
+            List<Subscription> subscriptionList = new List<Subscription>();
+            for (int i = 0; i < countSub; i++)
             {
                 Subscription sub = new Subscription();
-                sub.IsComplex = false;
+                sub.IsComplex = isComplex;
+                sub.SubscriberTopic = "";
+                Condition condition = new Condition();
                 sub.Conditions = new List<Condition>();
-                int numberOfConditions = random.Next(1, template.Length - 1);
-
-                    Condition conditionStationId = new Condition()
-                    {
-                        Field = template[0],
-                        Value = getRandomStationId().ToString(),
-                        Operator = operators[1][random.Next(3)]
-                    };
-
-                    Condition conditionCity = new Condition()
-                    {
-                        Field = template[1],
-                        Value = getRandomCity(),
-                        Operator = operators[0][random.Next(2)]
-                    };
-
-                    Condition conditionTemp = new Condition()
-                    {
-                        Field = template[2],
-                        Value = getRandomTemp().ToString(),
-                        Operator = operators[0][random.Next(2)]
-                    };
-
-                    Condition conditionRain = new Condition()
-                    {
-                        Field = template[3],
-                        Value = getRandomRain().ToString(),
-                        Operator = operators[0][random.Next(2)]
-                    };
-
-                    Condition conditionWind = new Condition()
-                    {
-                        Field = template[4],
-                        Value = getRandomWind().ToString(),
-                        Operator = operators[0][random.Next(2)]
-                    };
-
-                    Condition conditionDirection = new Condition()
-                    {
-                        Field = template[5],
-                        Value = getRandomDirection(),
-                        Operator = operators[0][random.Next(2)]
-                    };
-
-                    Condition conditionDate = new Condition()
-                    {
-                        Field = template[6],
-                        Value = getRandomDate().ToString(),
-                        Operator = operators[1][random.Next(3)]
-                    };
-
-                    List<Condition> possibleConditions = new List<Condition>();
-                    possibleConditions.Add(conditionStationId);
-                    possibleConditions.Add(conditionCity);
-                    possibleConditions.Add(conditionTemp);
-                    possibleConditions.Add(conditionRain);
-                    possibleConditions.Add(conditionWind);
-                    possibleConditions.Add(conditionDirection);
-                    possibleConditions.Add(conditionDate);
-
-                while (numberOfConditions != 0)
-                {
-                   int indexCond = random.Next(possibleConditions.Count);
-                    sub.Conditions.Add(possibleConditions[indexCond]);
-                    possibleConditions.RemoveAt(indexCond);
-                    numberOfConditions--;
-                }
-              //  Console.WriteLine(sub.ToString());
-                subscriptions.Add(sub);
+                subscriptionList.Add(sub);
             }
-            return subscriptions;
+
+            Dictionary<string, int> repetitionListForFields = getRatio(countSub, percentage, template);
+            List<int> subsWithCity = new List<int>();
+
+            while (repetitionListForFields.Count != 0)
+            {
+                for (int subIndex = 0; subIndex < countSub; subIndex++)
+                {
+
+                    List<string> listOfAvailableFields = new List<string>(repetitionListForFields.Keys);
+
+                    for (int index = 0; index < subscriptionList[subIndex].Conditions.Count; index++)
+                        if (listOfAvailableFields.Contains(subscriptionList[subIndex].Conditions[index].Field))
+                            listOfAvailableFields.Remove(subscriptionList[subIndex].Conditions[index].Field);
+
+                    if (listOfAvailableFields.Count != 0)
+                    {
+                        string fieldToAdd = listOfAvailableFields[random.Next(listOfAvailableFields.Count)];
+
+                        subscriptionList[subIndex].Conditions.Add(getCondition(fieldToAdd, operators, cities, tempMinim, tempMaxim, rainMinim, rainMaxim, windMinim, windMaxim, daysRange, stationidMinim, stationidMaxim, directionList));
+                        repetitionListForFields = recalculateRatio(repetitionListForFields, fieldToAdd);
+
+                        if (fieldToAdd == "city")
+                        {
+                            subsWithCity.Add(subIndex);
+                        }
+
+                        if (repetitionListForFields.Count == 0)
+                            break;
+                    }
+                }
+
+            }
+
+            subsWithCity = subsWithCity.OrderBy(x => Guid.NewGuid()).ToList();
+            int numberOfEqualRepetitionForCity = (int)((percentageForEqualForCity * 1.0 / 100 * subsWithCity.Count));
+            for (int i = 0; i < numberOfEqualRepetitionForCity; i++)
+            {
+                foreach (Condition cond in subscriptionList[subsWithCity[i]].Conditions)
+                {
+                    if (cond.Field == "city")
+                    {
+                        cond.Operator = "=";
+                    }
+                }
+            }
+
+            return subscriptionList;
         }
 
+
+        public static List<Subscription> GenerateSubscriptions(int numberOfSub)
+        {
+            Random random = new Random();
+            int tempMinim = -30;
+            int tempMaxim = 30;
+            int rainMinim = 0;
+            int rainMaxim = 100;
+            int windMinim = 0;
+            int windMaxim = 30;
+            int daysRange = 10;
+            int stationidMinim = 0;
+            int stationidMaxim = 100;
+            int percentageForEqualForCity = 50;
+
+            Dictionary<string, List<string>> operators = new Dictionary<string, List<string>> {
+            { "stationid", new List<string>() { "=", "!=" } },
+            { "city", new List<string>() { "=", "!=" } },
+            { "temp", new List<string>() { "=", ">", "<" } },
+            { "rain", new List<string>() { "=", ">", "<" } },
+            { "wind", new List<string>() { "=", ">", "<" } },
+            { "direction", new List<string>() { "=", "!=" } },
+            { "date", new List<string>() { "=", "!=" }
+            }
+        };
+            List<string> template = new List<string>
+        {
+            "stationid", "city", "temp", "rain", "wind", "direction", "date"
+        };
+
+            List<int> percentage = new List<int>
+        {
+            0, 100, 0, 80, 90, 10, 10
+        };
+
+            List<string> cities = new List<string>
+        {
+            "Botosani", "Iasi", "Cluj", "Timisoara", "Bucuresti", "Constanta", "Brasov", "Suceava", "Craiova", "Oradea"
+        };
+
+            List<string> directionList = new List<string>
+        {
+            "N", "S", "E", "V", "NE", "NV", "SE", "SV"
+        };
+           
+         
+
+            List<Subscription> subscriptions = GenerateSimpleSubscription(
+                numberOfSub,
+               Convert.ToBoolean(random.Next(2)),
+                tempMinim,
+                tempMaxim,
+                rainMinim,
+                rainMaxim,
+                windMinim,
+                windMaxim,
+                daysRange,
+                stationidMinim,
+                stationidMaxim,
+                percentageForEqualForCity,
+                operators,
+                template,
+                percentage,
+                cities,
+                directionList
+                );
+            
+            return subscriptions;
+        }
     }
 }

@@ -12,9 +12,9 @@ namespace EBSProject.Shared
         public static int BrokersNumber=3;
         public static int PublicationWindowSize=10;
         public static int SubscribersNumber = 3;
-        public static int SubscriptionsNumber = 10;
+        public static int SubscriptionsNumber = 15;
         public static int PublicationWindowTimeOut = 10;
-        public static int PublicationsNumber = 5;
+        public static int PublicationsNumber = 15;
         public static int PublisherNumber = 2;
         public static int PublisherSleep = -1;
         public static int ReceivedPublicationsCleanupPeriod = 5;
