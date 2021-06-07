@@ -1,0 +1,9 @@
+C:\Users\Claudiu\source\repos\EBSProject.Models\EBSProject.Models\bin\Debug\netcoreapp3.1\EBSProject.Shared.deps.json
+C:\Users\Claudiu\source\repos\EBSProject.Models\EBSProject.Models\bin\Debug\netcoreapp3.1\EBSProject.Shared.dll
+C:\Users\Claudiu\source\repos\EBSProject.Models\EBSProject.Models\bin\Debug\netcoreapp3.1\EBSProject.Shared.pdb
+C:\Users\Claudiu\source\repos\EBSProject.Models\EBSProject.Models\obj\Debug\netcoreapp3.1\EBSProject.Shared.AssemblyInfoInputs.cache
+C:\Users\Claudiu\source\repos\EBSProject.Models\EBSProject.Models\obj\Debug\netcoreapp3.1\EBSProject.Shared.AssemblyInfo.cs
+C:\Users\Claudiu\source\repos\EBSProject.Models\EBSProject.Models\obj\Debug\netcoreapp3.1\EBSProject.Shared.csproj.CoreCompileInputs.cache
+C:\Users\Claudiu\source\repos\EBSProject.Models\EBSProject.Models\obj\Debug\netcoreapp3.1\EBSProject.Shared.dll
+C:\Users\Claudiu\source\repos\EBSProject.Models\EBSProject.Models\obj\Debug\netcoreapp3.1\EBSProject.Shared.pdb
+C:\Users\Claudiu\source\repos\EBSProject.Models\EBSProject.Models\obj\Debug\netcoreapp3.1\EBSProject.Shared.csprojAssemblyReference.cache
