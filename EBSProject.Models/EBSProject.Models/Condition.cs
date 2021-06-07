@@ -15,5 +15,9 @@ namespace EBSProject.Shared
         [ProtoMember(3)]
         public string Value { get; set; }
 
+        public override string ToString()
+        {
+            return $"[{Field}, {Operator}, {Value}] ";
+        }
     }
 }

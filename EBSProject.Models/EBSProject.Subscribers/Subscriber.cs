@@ -17,6 +17,10 @@ namespace EBSProject.Subscribers
         private readonly int _simpleSubscriptionsCount;
         private readonly int _complexSubscriptionsCount;
         private string _topic;
+
+        private static int totalReceivedPublications = 0;
+        private static double totalReceivedPublicationsLatency = 0.0;
+
         public Subscriber(int subscriberIndex,string brokerTopic)
         {
             _messagePublisher = new MessagePublisher(Configuration.ServiceBusConnectionString, brokerTopic);
@@ -39,10 +43,36 @@ namespace EBSProject.Subscribers
             _subscriptionsClient.RegisterMessageHandler((message, token) =>
             {
                 var publication = Serializer.Deserialize<Publication>(new ReadOnlyMemory<byte>(message.Body));
+                totalReceivedPublications++;
+                checkTime(publication.PublicationId);
                 Console.WriteLine(publication.ToString());
                 return Task.CompletedTask;
             }, new MessageHandlerOptions(args => Task.CompletedTask));
             return Task.CompletedTask;
+        }
+
+        private void checkTime(string publicationId)
+        {
+
+            try
+            {
+                string dateString = publicationId.Split("_")[1];
+                if (dateString.StartsWith("ro"))
+                {
+                    return;
+                }
+                DateTime pubDate = Convert.ToDateTime(dateString);
+                DateTime now = DateTime.Now;
+                var diff = now - pubDate;
+                totalReceivedPublicationsLatency += diff.TotalMilliseconds;
+
+             //   Console.WriteLine($"Total messages is : {totalReceivedPublications}");
+             //   Console.WriteLine($"Total difference in ms is : {totalReceivedPublicationsLatency}");
+             //   Console.WriteLine($"Total avg latency (difference/msg) in ms: {totalReceivedPublicationsLatency/(double)totalReceivedPublicationsLatency}");
+            }
+            catch (Exception e)
+            { }
+
         }
     }
 }

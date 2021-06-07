@@ -23,7 +23,7 @@ namespace EBSProject.Subscribers
 
             foreach (var subscriber in subscribers)
             {
-                subscriber.StartAsync(new CancellationToken());
+               await subscriber.StartAsync(new CancellationToken());
             }
 
             Console.ReadLine();

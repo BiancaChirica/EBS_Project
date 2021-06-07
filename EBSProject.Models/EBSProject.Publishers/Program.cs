@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using EBSProject.Models;
 using EBSProject.Shared;
@@ -10,11 +11,22 @@ namespace EBSProject.Publishers
         static void Main(string[] args)
         {
             Random random = new Random();
-            int brokerIndex = random.Next(1, Configuration.BrokersNumber);
-            Console.WriteLine($"Broker {1} chosen");
-            var brokerTopic = "BrokerTopicPublications" + 1;
-            Publisher publisher = new Publisher(brokerTopic);
-            publisher.StartAsync(new CancellationToken());
+            List<Publisher> publishers = new List<Publisher>();
+
+            for (int publisherIndex = 1; publisherIndex <= Configuration.PublisherNumber; publisherIndex++)
+            {
+                int brokerIndex = random.Next(1, Configuration.BrokersNumber);
+             
+                var brokerTopic = "BrokerTopicPublications" + brokerIndex;
+                publishers.Add(new Publisher(publisherIndex, brokerTopic));
+                Console.WriteLine($"Broker {brokerIndex} chosen for publisher {publisherIndex}");
+            }
+
+            foreach (var publisher in publishers)
+            {
+               publisher.StartAsync(new CancellationToken());
+            }
+      
             Console.ReadLine();
         }
     }

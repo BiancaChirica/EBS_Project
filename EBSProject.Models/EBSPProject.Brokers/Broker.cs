@@ -82,7 +82,7 @@ namespace EBSPProject.Brokers
                 }
                 Task.Run(() =>
                     {
-                        foreach (var subscriber in _subscribers)
+                        foreach (var subscriber in _subscribers.ToList())
                         {
                             if (_matcher.Match(publication, subscriber.Subscription))
                             {

@@ -22,9 +22,6 @@ namespace publisher
         static int[] daysLimit = { 0, 10 };
         static int[] stationIdLimit = { 0, 100 };
 
-        // Data to configure
-        static int numberOfPublications = 10;
-
         public static string getRandomCity() {
 
             return cities[random.Next(cities.Length)];
@@ -60,10 +57,7 @@ namespace publisher
 
         // Generates the publications with random values for the fields
          public static List<Publication> GeneratePublications(int numberOfPub) {
-            if (numberOfPub == 0)
-            {
-                numberOfPub = numberOfPublications;
-            }
+      
             List<Publication> publications = new List<Publication>();
             for (int index = 0; index < numberOfPub; index++)
             {
@@ -76,9 +70,10 @@ namespace publisher
                     Wind = getRandomWind(),
                     Direction = getRandomDirection(),
                     Date = getRandomDate(),
-                    PublicationId = $"{index}_{DateTime.Now}"
+                    PublicationId = $"{index}_{DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss.fff")}"
 
                 };
+
             publications.Add(pub);
             }
             return publications;

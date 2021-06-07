@@ -14,5 +14,20 @@ namespace EBSProject.Shared
         public List<Condition> Conditions { get; set; }
         [ProtoMember(3)]
         public bool IsComplex { get; set; }
+
+        public override string ToString()
+        {
+            string result = $"Subscription : IsComplex : {IsComplex}, ";
+            if (Conditions != null)
+            {
+                foreach (Condition cond in Conditions)
+                {
+                    result += cond.ToString();
+                }
+            }
+            return result;
+        }
     }
+
+
 }
